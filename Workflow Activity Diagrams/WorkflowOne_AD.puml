@@ -1,0 +1,22 @@
+@startuml Workflow One Activity Diagram
+title Workflow One: Employee enters new inventory
+
+start 
+
+:Employee logs into system;
+
+:Select "Manage Inventory";
+
+:Enter item details (name, quantity, price);
+if(Does the item exist?) then (Yes)
+    :Update Quantity/Price;
+else (No)
+    :Create New Item;
+endif
+
+:Save changes to the database;
+
+:Display success message;
+
+stop
+@enduml
