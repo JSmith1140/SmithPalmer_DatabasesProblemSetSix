@@ -3,8 +3,6 @@ title Workflow One: Employee enters new inventory
 
 start 
 
-:Employee logs into system;
-
 :Select "Enter New Inventory";
 
 :Enter item details (name, quantity, price);
