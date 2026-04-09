@@ -5,7 +5,7 @@ start
 
 :Employee logs into system;
 
-:Select "Manage Inventory";
+:Select "Enter New Inventory";
 
 :Enter item details (name, quantity, price);
 if(Does the item exist?) then (Yes)
