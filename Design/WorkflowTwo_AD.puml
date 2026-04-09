@@ -1,0 +1,49 @@
+@startuml Workflow Two Activity Diagram
+title Workflow 2: Customer Submits Order & Delivery Scheduling
+
+start
+
+:Customer enters order details;
+
+:Check if customer already ordered today;
+
+if (Already ordered?) then (Yes)
+    :Display error "Only one order per day allowed";
+    stop
+else (No)
+
+    :Check inventory availability;
+
+    if (Items in stock?) then (Yes)
+
+        :Create order record;
+        :Add order items;
+
+        :Get list of available employees;
+
+        if (Any delivery slots available?) then (Yes)
+
+            :Assign order to employee;
+            :Insert into delivery schedule;
+
+            :Calculate delivery route;
+            :Estimate delivery time based on:
+            - Current schedule
+            - Campus travel times;
+
+            :Update delivery record with time;
+
+            :Display confirmation with delivery time;
+
+        else (No)
+            :Display "No delivery slots available today";
+        endif
+
+    else (No)
+        :Display "Item out of stock";
+    endif
+
+endif
+
+stop
+@enduml
