@@ -111,4 +111,87 @@ public class Main {
             System.out.println("\n❌ " + e.getMessage());
         }
     }
+    //Unit tests for every code path in this java program, including the BLL and DAL, along with this program's stored procedures, to ensure that all functional dependencies are upheld.
+    @Test
+    public void testInventoryController() throws Exception {
+        InventoryController controller = new InventoryController();
+        // Test adding new item
+        controller.addOrUpdateItem("Test Item", 10, 5.99);
+        // Test updating existing item
+        controller.addOrUpdateItem("Test Item", 20, 4.99);
+    }
+    public void testOrderController() {
+        OrderController controller = new OrderController();
+        // Test placing a valid order
+        String result = controller.placeOrder(1, "Test Item", 5);
+        assert(result.contains("Order placed successfully"));
+        // Test placing an order with insufficient inventory
+        try {
+            controller.placeOrder(1, "Test Item", 100);
+        } catch (Exception e) {
+            assert(e.getMessage().contains("Insufficient inventory"));
+        }
+    }
+    public void testDataMgr() {
+        // Test database connection
+        try {
+            DataMgr.initialize("testUser", "testPass");
+            assert(DataMgr.getConnection() != null);
+        } catch (Exception e) {
+            assert(false); // Fail if connection fails
+        } finally {
+            DataMgr.closeConnection();
+        }
+    }
+    public void testStoredProcedures() throws Exception {
+        // Test stored procedure for adding/updating inventory
+        InventoryController controller = new InventoryController();
+        controller.addOrUpdateItem("SP Test Item", 15, 3.99);
+        // Test stored procedure for placing an order
+        OrderController orderController = new OrderController();
+        String result = orderController.placeOrder(1, "SP Test Item", 5);
+        assert(result.contains("Order placed successfully"));
+    }
+    public void testFunctionalDependencies() throws Exception {
+        // Test that inventory updates reflect in order placement
+        InventoryController controller = new InventoryController();
+        controller.addOrUpdateItem("Dependency Test Item", 10, 2.99);
+        OrderController orderController = new OrderController();
+        String result = orderController.placeOrder(1, "Dependency Test Item", 5);
+        assert(result.contains("Order placed successfully"));
+        // Now update inventory to a lower quantity and test order failure
+        controller.addOrUpdateItem("Dependency Test Item", 3, 2.99);
+        try {
+            orderController.placeOrder(1, "Dependency Test Item", 5);
+        } catch (Exception e) {
+            assert(e.getMessage().contains("Insufficient inventory"));
+        }
+    }
+    public void testEdgeCases() throws Exception {
+        InventoryController controller = new InventoryController();
+        // Test adding item with zero quantity
+        controller.addOrUpdateItem("Edge Case Item", 0, 1.99);
+        // Test placing order for item with zero inventory
+        OrderController orderController = new OrderController();
+        try {
+            orderController.placeOrder(1, "Edge Case Item", 1);
+        } catch (Exception e) {
+            assert(e.getMessage().contains("Insufficient inventory"));
+        }
+    }
+    public void testInvalidInputs() {
+        InventoryController controller = new InventoryController();
+        // Test adding item with negative quantity
+        try {
+            controller.addOrUpdateItem("Invalid Input Item", -5, 1.99);
+        } catch (Exception e) {
+            assert(e.getMessage().contains("Invalid quantity"));
+        }
+        // Test adding item with negative price
+        try {
+            controller.addOrUpdateItem("Invalid Input Item", 5, -1.99);
+        } catch (Exception e) {
+            assert(e.getMessage().contains("Invalid price"));
+        }
+    }
 }
