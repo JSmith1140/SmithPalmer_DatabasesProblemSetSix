@@ -63,6 +63,11 @@ CREATE TABLE employees (
     email VARCHAR(100) NOT NULL UNIQUE,
     delivery_start_time TIME NOT NULL,
     delivery_end_time TIME NOT NULL,
+    dorm_id INT,
+    CONSTRAINT fk_employee_dorm
+        FOREIGN KEY (dorm_id) REFERENCES dorms(dorm_id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
     CONSTRAINT check_delivery_window
         CHECK (delivery_end_time > delivery_start_time)
 );
@@ -142,11 +147,13 @@ CREATE TABLE deliveries (
     order_id INT NOT NULL UNIQUE,
     employee_id INT NOT NULL,
     estimated_delivery_time TIMESTAMP NOT NULL,
+
     CONSTRAINT fk_deliveries_order
         FOREIGN KEY (order_id)
         REFERENCES orders(order_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
+
     CONSTRAINT fk_deliveries_employee
         FOREIGN KEY (employee_id)
         REFERENCES employees(employee_id)
@@ -221,9 +228,10 @@ INSERT INTO students (student_id, student_name, phone, email, room_id) VALUES
 -- =========================
 -- Employees
 -- =========================
-INSERT INTO employees (employee_id, employee_name, phone, email, delivery_start_time, delivery_end_time) VALUES
-(1, 'Matthew Palmer', '555-000-0006', 'palmerm@dormdash.com', '15:00', '17:00'),
-(2, 'Jacob Smith', '555-000-0007', 'jsmith@dormdash.com', '16:00', '18:00');
+INSERT INTO employees (employee_id, employee_name, phone, email, delivery_start_time, delivery_end_time, dorm_id) VALUES
+(1, 'Matthew Palmer', '555-000-0006', 'palmerm@dormdash.com', '21:00', '23:00', 1),
+(2, 'Jacob Smith', '555-000-0007', 'jsmith@dormdash.com', '16:00', '18:00', 2),
+(3, 'Jackson Haywood', '555-000-0007', 'haywoodj@dormdash.com', '21:00', '23:00', 2);
 
 -- =========================
 -- Inventory Items
@@ -296,13 +304,15 @@ INSERT INTO delivery_items (delivery_id, item_id, quantity) VALUES
 -- =========================
 -- Campus Graph (Edges)
 -- =========================
-INSERT INTO campus_edges (edge_id, from_dorm_id, to_dorm_id, travel_time) VALUES
-(1, 1, 2, 1),
-(2, 2, 3, 5),
-(3, 1, 3, 2),
-(4, 2, 1, 1),
-(5, 3, 2, 5),
-(6, 3, 1, 2);
+INSERT INTO campus_edges (from_dorm_id, to_dorm_id, travel_time) VALUES
+(1, 2, 10),
+(2, 1, 10),
+
+(2, 3, 15),
+(3, 2, 15),
+
+(1, 3, 5),
+(3, 1, 5);
 
 DELIMITER //
 
@@ -326,4 +336,3 @@ BEGIN
 END //
 
 DELIMITER ;
-
