@@ -1,0 +1,107 @@
+@startuml DormDash Architecture Diagram
+title DormDash Program Architecture
+
+package "Presentation Layer" {
+
+    class Main {
+        +handleOrder()
+        +handleLibraryReturn()
+        +handleInventoryInput()
+        +handleReport()
+    }
+}
+
+package "Business Logic Layer (BLL)" {
+
+    class OrderController{
+        +placeOrder()
+        +placeOrderInteractive()
+    }
+    class InventoryController{
+        +addOrUpdateItem()
+        +addInventoryInteractive()
+    }
+    class ServiceController{
+        +requestLibraryReturn()
+    }
+    class ReportController{
+        +generateWeeklyReport()
+    }
+    class DeliveryScheduler {
+        +schedule()
+    }
+    class CampusGraphBLL {
+        -buildGraph()
+        +getShortestTravelTime()
+    }
+}
+
+package "Data Access Layer (DAL)" {
+
+    class DataMgr{
+        +initialize()
+        +getConnection()
+        +closeConnection()
+    }
+    class InventoryDataProvider{
+        +addOrUpdateItem()
+        +isInStock()
+        +getItemId()
+        +getPrice()
+    }
+    class OrderDataProvider{
+        +createOrder()
+        +addOrderItem()
+    }
+    class ServiceOrderDataProvider{
+        +createServiceOrder()
+    }
+    class DeliveryDataProvider{
+        +getNextAvaliableSlot()
+        +assignOrderDelivery()
+        +assignServiceDelivery()
+    }
+    class CampusGraphProvider{
+        +getGraph()
+        +getShortestTravelTime()
+    }
+    class StudentDataProvider{
+        +getStudentDorm()
+    }
+    class EmployeeDataProvider{
+        +getAllEmployees()
+        +isEmployeeOnShift()
+        +getEmployeeDorm()
+        +isEmployeeBusy()
+    }
+    class ReportDataProvider{
+        +getAllDeliveries()
+    }
+}
+
+Main --> OrderController
+Main --> InventoryController
+Main --> ServiceController
+Main --> ReportController
+
+OrderController --> OrderDataProvider
+OrderController --> InventoryDataProvider
+OrderController --> DeliveryScheduler
+
+InventoryController --> InventoryDataProvider
+
+ServiceController --> ServiceOrderDataProvider
+ServiceController --> DeliveryScheduler
+
+ReportController --> ReportDataProvider
+ReportController --> EmployeeDataProvider
+ReportController --> CampusGraphBLL
+
+DeliveryScheduler --> EmployeeDataProvider
+DeliveryScheduler --> CampusGraphBLL
+DeliveryScheduler --> OrderDataProvider
+DeliveryScheduler --> ServiceOrderDataProvider
+
+CampusGraphBLL --> CampusGraphProvider
+
+@enduml
