@@ -3,6 +3,10 @@
 */
 
 /*This SQL Script is for the Dorm Dash Application, which is an application that is used for getting snacks and school supplies delivered and is intended for use by you, employees, and customers.*/
+SET SQL_SAFE_UPDATES = 0;
+DROP DATABASE IF EXISTS ProblemSetSix;
+CREATE DATABASE ProblemSetSix;
+USE ProblemSetSix;
 
 -- Drop tables in reverse dependency order
 DROP TABLE IF EXISTS delivery_items CASCADE;
@@ -20,13 +24,13 @@ DROP TABLE IF EXISTS campus_edges CASCADE;
 
 -- Dorms
 CREATE TABLE dorms (
-    dorm_id SERIAL PRIMARY KEY,
+    dorm_id INT AUTO_INCREMENT PRIMARY KEY,
     dorm_name VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- Rooms
 CREATE TABLE rooms (
-    room_id SERIAL PRIMARY KEY,
+    room_id INT AUTO_INCREMENT PRIMARY KEY,
     dorm_id INT NOT NULL,
     room_number VARCHAR(10) NOT NULL,
     CONSTRAINT fk_rooms_dorm
@@ -39,7 +43,7 @@ CREATE TABLE rooms (
 
 -- Students
 CREATE TABLE students (
-    student_id SERIAL PRIMARY KEY,
+    student_id INT AUTO_INCREMENT PRIMARY KEY,
     student_name VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -53,7 +57,7 @@ CREATE TABLE students (
 
 -- Employees
 CREATE TABLE employees (
-    employee_id SERIAL PRIMARY KEY,
+    employee_id INT AUTO_INCREMENT PRIMARY KEY,
     employee_name VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -65,7 +69,7 @@ CREATE TABLE employees (
 
 -- Inventory
 CREATE TABLE inventory_items (
-    item_id SERIAL PRIMARY KEY,
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
     item_name VARCHAR(100) NOT NULL,
     category VARCHAR(50) NOT NULL,
     price DECIMAL(8,2) NOT NULL CHECK (price >= 0),
@@ -74,7 +78,7 @@ CREATE TABLE inventory_items (
 
 -- Orders (one per student per day)
 CREATE TABLE orders (
-    order_id SERIAL PRIMARY KEY,
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
     order_date DATE NOT NULL,
     status VARCHAR(50) NOT NULL,
@@ -108,14 +112,14 @@ CREATE TABLE order_items (
 
 -- Services (Dunks, Library, etc.)
 CREATE TABLE services (
-    service_id SERIAL PRIMARY KEY,
+    service_id INT AUTO_INCREMENT PRIMARY KEY,
     service_type VARCHAR(50) NOT NULL,
     description TEXT
 );
 
 -- Service Orders
 CREATE TABLE service_orders (
-    service_order_id SERIAL PRIMARY KEY,
+    service_order_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
     service_id INT NOT NULL,
     order_date DATE NOT NULL,
@@ -134,7 +138,7 @@ CREATE TABLE service_orders (
 
 -- Deliveries
 CREATE TABLE deliveries (
-    delivery_id SERIAL PRIMARY KEY,
+    delivery_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL UNIQUE,
     employee_id INT NOT NULL,
     estimated_delivery_time TIMESTAMP NOT NULL,
@@ -152,7 +156,7 @@ CREATE TABLE deliveries (
 
 -- Campus Graph (Edges)
 CREATE TABLE campus_edges (
-    edge_id SERIAL PRIMARY KEY,
+    edge_id INT AUTO_INCREMENT PRIMARY KEY,
     from_dorm_id INT NOT NULL,
     to_dorm_id INT NOT NULL,
     travel_time INT NOT NULL CHECK (travel_time > 0),
@@ -207,19 +211,19 @@ INSERT INTO rooms (room_id, dorm_id, room_number) VALUES
 -- =========================
 -- Students
 -- =========================
-INSERT INTO students (student_id, student_name, email, room_id) VALUES
-(1, 'Nicole Jefferson', 'njefferson@merrimack.edu', 1),
-(2, 'Bob Samson', 'bsamson@merrimack.edu', 1),
-(3, 'Dylan Bluford', 'dbluford@merrimack.edu', 2),
-(4, 'Jessie Vince', 'jvince@merrimack.edu', 3),
-(5, 'Samuel Nelson', 'snelson@merrimack.edu', 4);
+INSERT INTO students (student_id, student_name, phone, email, room_id) VALUES
+(1, 'Nicole Jefferson', '555-000-0001', 'njefferson@merrimack.edu', 1),
+(2, 'Bob Samson', '555-000-0002', 'bsamson@merrimack.edu', 1),
+(3, 'Dylan Bluford', '555-000-0003', 'dbluford@merrimack.edu', 2),
+(4, 'Jessie Vince', '555-000-0004', 'jvince@merrimack.edu', 3),
+(5, 'Samuel Nelson', '555-000-0005', 'snelson@merrimack.edu', 4);
 
 -- =========================
 -- Employees
 -- =========================
-INSERT INTO employees (employee_id, employee_name, email, delivery_start_time, delivery_end_time) VALUES
-(1, 'Matthew Palmer', 'palmerm@dormdash.com', '15:50', '19:00'),
-(2, 'Jacob Smith', 'jsmith@dormdash.com', '16:00', '20:30');
+INSERT INTO employees (employee_id, employee_name, phone, email, delivery_start_time, delivery_end_time) VALUES
+(1, 'Matthew Palmer', '555-000-0006', 'palmerm@dormdash.com', '15:00', '17:00'),
+(2, 'Jacob Smith', '555-000-0007', 'jsmith@dormdash.com', '16:00', '18:00');
 
 -- =========================
 -- Inventory Items
@@ -299,4 +303,27 @@ INSERT INTO campus_edges (edge_id, from_dorm_id, to_dorm_id, travel_time) VALUES
 (4, 2, 1, 1),
 (5, 3, 2, 5),
 (6, 3, 1, 2);
+
+DELIMITER //
+
+CREATE PROCEDURE add_or_update_inventory(
+    IN p_name VARCHAR(100),
+    IN p_category VARCHAR(50),
+    IN p_quantity INT,
+    IN p_price DECIMAL(8,2)
+)
+BEGIN
+    IF EXISTS (SELECT 1 FROM inventory_items WHERE item_name = p_name) THEN
+        UPDATE inventory_items
+        SET quantity_available = quantity_available + p_quantity,
+            price = p_price,
+            category = p_category
+        WHERE item_name = p_name;
+    ELSE
+        INSERT INTO inventory_items (item_name, category, price, quantity_available)
+        VALUES (p_name, p_category, p_price, p_quantity);
+    END IF;
+END //
+
+DELIMITER ;
 
