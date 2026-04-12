@@ -1,0 +1,65 @@
+@startuml Workflow Two Sequence Diagram
+title DormDash Workflow Two - Customer Places Order
+
+actor Customer
+participant "Main UI" as UI
+participant "OrderController" as OC
+participant "InventoryDataProvider" as IDP
+participant "OrderDataProvider" as ODP
+participant "DeliveryScheduler" as DS
+database "MySQL Database" as DB
+
+Customer -> UI : Select "Place Order"
+
+UI -> OC : placeOrderInteractive(studentId, scanner)
+
+OC -> Customer : Prompt Student ID
+Customer -> OC : Enter Student ID
+
+loop For each item
+    OC -> Customer : Prompt item name
+    Customer -> OC : Enter item name
+
+    OC -> Customer : Prompt quantity
+    Customer -> OC : Enter quantity
+
+    OC -> IDP : isInStock(name, qty)
+
+    alt Not enough stock
+        IDP --> OC : false
+        OC -> Customer : "Not enough stock"
+    else In stock
+        IDP --> OC : true
+        OC -> OC : Add item to order map
+    end
+end
+
+OC -> OC : placeOrder(studentId, items)
+
+OC -> ODP : createOrder(studentId)
+ODP -> DB : INSERT INTO orders
+DB --> ODP : orderId
+
+loop For each item in order
+    OC -> IDP : getPrice(itemName)
+    OC -> IDP : getItemId(itemName)
+
+    OC -> ODP : addOrderItem(orderId, itemId, qty, price)
+    ODP -> DB : INSERT INTO order_items
+    DB --> ODP : success
+end
+
+OC -> DS : schedule(orderId, studentId, null, false)
+
+DS -> IDP : getAllEmployees
+DS -> DS : compute best employee
+DS -> DB : INSERT INTO deliveries
+DB --> DS : success
+
+DS --> OC : ETA
+
+OC --> UI : "Order placed successfully! ETA: ..."
+
+UI --> Customer : Display confirmation
+
+@enduml
