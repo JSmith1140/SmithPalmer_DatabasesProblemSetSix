@@ -1,0 +1,44 @@
+@startuml Workflow One Sequence Diagram
+title DormDash Workflow One - Employee enters new inventory
+
+actor Employee
+participant "Main UI" as UI
+participant "InventoryController" as IC
+participant "InventoryDataProvider" as IDP
+database "MySQL Database" as DB
+
+Employee -> UI : Select "Enter New Inventory"
+
+UI -> IC : addInventoryInteractive(scanner)
+
+IC -> Employee : Prompt for item name
+Employee -> IC : Enter item name
+
+IC -> Employee : Prompt for category
+Employee -> IC : Enter category
+
+IC -> Employee : Validate category (loop until valid)
+
+IC -> Employee : Prompt for quantity
+Employee -> IC : Enter quantity
+
+IC -> Employee : Validate quantity (loop until valid)
+
+IC -> Employee : Prompt for price
+Employee -> IC : Enter price
+
+IC -> Employee : Validate price (loop until valid)
+
+IC -> IDP : addOrUpdateItem(name, category, quantity, price)
+
+IDP -> DB : INSERT or UPDATE inventory_items
+
+DB --> IDP : Success / Failure result
+
+IDP --> IC : Confirmation
+
+IC --> UI : "Inventory updated successfully!"
+
+UI --> Employee : Display success message
+
+@enduml
