@@ -141,6 +141,25 @@ CREATE TABLE service_orders (
         ON UPDATE CASCADE
 );
 
+CREATE TABLE service_deliveries (
+    service_delivery_id SERIAL PRIMARY KEY,
+    service_order_id INT NOT NULL UNIQUE,
+    employee_id INT NOT NULL,
+    estimated_delivery_time TIMESTAMP NOT NULL,
+
+    CONSTRAINT fk_service_deliveries_order
+        FOREIGN KEY (service_order_id)
+        REFERENCES service_orders(service_order_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_service_deliveries_employee
+        FOREIGN KEY (employee_id)
+        REFERENCES employees(employee_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
 -- Deliveries
 CREATE TABLE deliveries (
     delivery_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -204,7 +223,8 @@ CREATE TABLE delivery_items (
 INSERT INTO dorms (dorm_id, dorm_name) VALUES
 (1, 'Deegan Hall East'),
 (2, "O'Brien Hall"),
-(3, 'Ash Centre');
+(3, 'Ash Centre'),
+(4, 'Library');
 
 -- =========================
 -- Rooms
@@ -230,8 +250,8 @@ INSERT INTO students (student_id, student_name, phone, email, room_id) VALUES
 -- =========================
 INSERT INTO employees (employee_id, employee_name, phone, email, delivery_start_time, delivery_end_time, dorm_id) VALUES
 (1, 'Matthew Palmer', '555-000-0006', 'palmerm@dormdash.com', '21:00', '23:00', 1),
-(2, 'Jacob Smith', '555-000-0007', 'jsmith@dormdash.com', '16:00', '18:00', 2),
-(3, 'Jackson Haywood', '555-000-0007', 'haywoodj@dormdash.com', '21:00', '23:00', 2);
+(2, 'Jacob Smith', '555-000-0007', 'jsmith@dormdash.com', '1:00', '3:00', 2),
+(3, 'Jackson Haywood', '555-000-0007', 'haywoodj@dormdash.com', '1:00', '3:00', 2);
 
 -- =========================
 -- Inventory Items
@@ -248,8 +268,7 @@ INSERT INTO inventory_items (item_id, item_name, category, price, quantity_avail
 -- =========================
 INSERT INTO services (service_id, service_type, description) VALUES
 (1, 'Dunks Pickup', 'Pickup order from Dunkin'),
-(2, 'Library Delivery', 'Deliver books from library'),
-(3, 'Library Return', 'Return books to library');
+(2, 'Library Return', 'Return books to library');
 
 -- =========================
 -- Orders
@@ -277,8 +296,7 @@ INSERT INTO order_items (order_id, item_id, quantity, price_at_purchase) VALUES
 -- =========================
 INSERT INTO service_orders (service_order_id, student_id, service_id, order_date, status) VALUES
 (1, 1, 1, '2026-04-11', 'Scheduled'),
-(2, 2, 2, '2026-01-14', 'Completed'),
-(3, 3, 3, '2026-05-01', 'Scheduled');
+(2, 2, 2, '2026-01-14', 'Completed');
 
 -- =========================
 -- Deliveries
@@ -311,8 +329,11 @@ INSERT INTO campus_edges (from_dorm_id, to_dorm_id, travel_time) VALUES
 (2, 3, 15),
 (3, 2, 15),
 
-(1, 3, 5),
-(3, 1, 5);
+(3, 4, 8),
+(4, 3, 8),
+
+(1, 4, 5),
+(4, 1, 5);
 
 DELIMITER //
 
@@ -336,3 +357,4 @@ BEGIN
 END //
 
 DELIMITER ;
+
