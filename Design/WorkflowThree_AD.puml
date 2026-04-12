@@ -1,0 +1,46 @@
+@startuml Workflow Three Activity Diagram
+title DormDash Workflow Three - Library Book Pickup & Return
+
+start
+
+:Student submits library return request;
+
+:System creates service order;
+
+:System retrieves all employees;
+
+:Filter employees by shift availability;
+:Filter employees by not busy;
+
+:System selects best employee based on shortest travel time;
+
+if (Employee available?) then (yes)
+
+  :Assign employee to service delivery;
+
+  partition "Employee Actions" {
+
+    :Travel from employee dorm to student dorm;
+    :Pick up library book at dorm;
+
+    :Travel from student dorm to library;
+    :Drop off book at library;
+
+  }
+
+  :System records service delivery;
+
+  :Calculate ETA;
+
+  :Send confirmation to student;
+
+else (no)
+
+  :No available employees;
+  stop
+
+endif
+
+stop
+
+@enduml
