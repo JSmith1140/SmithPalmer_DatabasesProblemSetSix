@@ -1,0 +1,47 @@
+@startuml Workflow Three Sequence Diagram
+title DormDash Workflow Three - Library Book Pickup & Return
+
+actor Student
+participant "Main UI" as UI
+participant "ServiceController" as SC
+participant "ServiceOrderDataProvider" as SOP
+participant "DeliveryScheduler" as DS
+participant "EmployeeDataProvider" as EDP
+participant "CampusGraphBLL" as GRAPH
+database "MySQL Database" as DB
+
+Student -> UI : Select "Library Return"
+
+UI -> SC : requestLibraryReturn(studentId)
+
+SC -> SOP : createServiceOrder(studentId, serviceId=2)
+SOP -> DB : INSERT INTO service_orders
+DB --> SOP : serviceOrderId
+
+SC -> DS : schedule(serviceOrderId, studentId, libraryDormId, true)
+
+DS -> EDP : getAllEmployees()
+
+loop For each employee
+    DS -> EDP : isEmployeeOnShift(empId)
+    DS -> EDP : isEmployeeBusy(empId)
+
+    alt employee valid
+        DS -> EDP : getEmployeeDorm(empId)
+        DS -> GRAPH : getShortestTravelTime(empDorm, studentDorm)
+        DS -> GRAPH : getShortestTravelTime(studentDorm, libraryDorm)
+
+        DS -> DS : compute total travel time
+    end
+end
+
+DS -> DB : INSERT INTO service_deliveries
+DB --> DS : success
+
+DS --> SC : ETA (LocalDateTime)
+
+SC --> UI : "Library return scheduled! ETA: ..."
+
+UI --> Student : Display confirmation
+
+@enduml
