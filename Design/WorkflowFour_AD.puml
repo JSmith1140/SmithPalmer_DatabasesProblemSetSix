@@ -1,0 +1,46 @@
+@startuml Workflow Four Activity Diagram
+title DormDash Workflow Four - Weekly Report
+
+start
+
+:Manager requests weekly report;
+
+:System retrieves all delivery records;
+
+:Group records by employee;
+
+repeat
+  :Select employee;
+
+  :Group employee records by day of week;
+
+  repeat
+    :Select day;
+
+    repeat
+      :Read delivery record;
+
+      :Get employee dorm;
+      :Calculate travel time:
+
+      :Add time to daily total;
+      :Store goods delivered info;
+
+    repeat while (more deliveries for day?)
+
+    :Store daily summary:
+    - Delivery path
+    - Goods delivered
+    - Total time;
+
+  repeat while (more days for employee?)
+
+repeat while (more employees?)
+
+:System compiles weekly report;
+
+:System displays report to manager;
+
+stop
+
+@enduml
